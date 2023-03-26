@@ -1,4 +1,8 @@
 [package]
 
-rgb-wallet = "0.10-alpha"
+rgb-wallet = "0.10"
 ldk = "0.1.0"
+
+
+[dependencies]
+rgb-wallet = { version = "0.8", features = ["walle", "psbt"] }
