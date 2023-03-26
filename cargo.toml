@@ -1,0 +1,4 @@
+[package]
+
+rgb-wallet = "0.10-alpha"
+ldk = "0.1.0"
