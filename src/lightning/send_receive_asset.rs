@@ -1,26 +1,35 @@
-use bdk::{
-    bitcoin::{Address, Amount, OutPoint, PublicKey, SigHashType, Transaction, TxIn, TxOut},
-    database::MemoryDatabase,
-    wallet::{AddressIndex, CoinSelectionAlgorithm, Wallet},
+use ldk::{
+    chain::keysinterface::Sign as _, 
+    chain::transaction::OutPoint as _, 
+    chain::keysinterface::KeysInterface as _, 
+    chain::keysinterface::InMemorySigner as _, 
+    wallet::{AddressIndex, Wallet, WalletContext},
+    blockfilter::{BlockFilter, GolombFilter},
+    logger::Logger,
+    miniscript::descriptor::DescriptorPublicKey,
+    miniscript::Descriptor,
+    util::events::{Event, MessageSendEvent},
+};
+
+use bitcoin::{
+    blockdata::{opcodes::All, script::Builder, transaction::OutPoint, transaction::TxOut},
+    util::amount::Amount,
 };
 
 // Define the network you want to use, e.g. testnet or mainnet
-let network = bdk::bitcoin::Network::Testnet;
+let network = bitcoin::network::constants::Network::Testnet;
 
-// Create a new wallet instance with an empty keychain and a memory database
-let wallet = Wallet::new(
-    network,
-    "".into(), // Enter the seed phrase for an existing wallet, or leave empty to create a new one
-    MemoryDatabase::default(),
-    bdk::blockchain::EsploraBlockchain::from(
-        "https://blockstream.info/testnet/api".to_string(),
-        network,
-    )
-    .unwrap(),
+// Create a new wallet instance with an empty keychain and an in-memory signer
+let keys_interface = InMemorySigner::new();
+let mut wallet = Wallet::new(
+    WalletContext::new(network),
+    keys_interface.clone(),
+    BlockFilter::new(GolombFilter::new_for_key(network.genesis_blockheader().block_hash())),
+    Logger::new("wallet".into()),
 );
 
 // Generate a new receive address
-let address = wallet.get_address(AddressIndex::New).unwrap();
+let address = wallet.get_new_address().unwrap();
 
 // Print the address to the console
 println!("Receive address: {}", address);
@@ -37,28 +46,48 @@ let (balance, txs) = wallet.sync().unwrap();
 println!("Wallet balance: {}", balance);
 
 // Create a new transaction that sends 100 satoshis to the specified address
-let to_address = Address::from_str("tb1q5r6ju5y9d5au8h5mlwmmtgrg0hsmvplp6wdsf8").unwrap();
+let to_address = bitcoin::Address::from_str("tb1q5r6ju5y9d5au8h5mlwmmtgrg0hsmvplp6wdsf8").unwrap();
 let fee_rate = 100; // Satoshis per byte
-let mut builder = wallet.build_tx();
-builder
-    .add_recipient(to_address.script_pubkey(), Amount::from_sat(100))
-    .fee_rate(fee_rate)
-    .enable_rbf()
-    .do_not_spend_change();
-let (psbt, details) = builder.finish().unwrap();
 
-// Print the PSBT to the console
-println!("Unsigned PSBT: {}", psbt);
+let mut builder = bitcoin::TransactionBuilder::new();
 
-// Sign the PSBT with the wallet's private keys
-let signed_psbt = wallet.sign(psbt, None).unwrap();
+let mut txin = bitcoin::TxIn {
+    previous_output: OutPoint {
+        txid: tx_id,
+        vout: output_index,
+    },
+    sequence: 0xFFFFFFFF,
+    witness: Vec::new(),
+    script_sig: bitcoin::Script::default(),
+};
 
-// Print the signed PSBT to the console
-println!("Signed PSBT: {}", signed_psbt);
+builder.add_input(txin, txout);
 
-// Broadcast the transaction to the Bitcoin network
-let txid = wallet.broadcast(signed_psbt).unwrap();
+let output_script = Builder::new()
+    .push_opcode(All::OP_DUP)
+    .push_opcode(All::OP_HASH160)
+    .push_slice(&to_address.script_pubkey().as_bytes()[2..22])
+    .push_opcode(All::OP_EQUALVERIFY)
+    .push_opcode(All::OP_CHECKSIG)
+    .into_script();
 
-// Print the transaction ID to the console
-println!("Transaction ID: {}", txid);
+builder.add_output(TxOut {
+    value: Amount::from_sat(100),
+    script_pubkey: output_script,
+});
+
+builder.set_version(2);
+builder.set_lock_time(0);
+
+// Sign the transaction with the wallet's private keys
+let descriptor = Descriptor::<DescriptorPublicKey>::new(
+    "wpkh(.....)", // Enter your descriptor here
+    bitcoin::ScriptContext::new(
+        bitcoin::network::constants::Network::Testnet, // Replace with mainnet for live transactions
+        bitcoin::ScriptType::P2WPKHv0,
+    ),
+)
+.unwrap();
+let signers = vec![keys_interface.clone()];
+let mut psbt =
 
