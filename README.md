@@ -24,8 +24,6 @@ Wallet support for RGB assets, BitDEX and Lightning Network
 
 - [X] Testnet
 
--[ ] BitDEX
-
 # Product
 
 Built on RGB, LDK and BDK
