@@ -20,11 +20,11 @@ Wallet support for RGB assets, BitDEX and Lightning Network
 
 - [X] Lightning Network and RGB
 
-- []RGB proxy
+- [ ] RGB proxy
 
 - [X]Testnet
 
-- [ ] BitDEX
+-[ ] BitDEX
 
 # Product
 
