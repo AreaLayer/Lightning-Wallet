@@ -7,8 +7,11 @@ Wallet support for RGB assets, BitDEX and Lightning Network
 
 -BitDEX;
 -Lightning Network;
+
 -RGB wallet;
+
 -RGB proxy;
+
 -Add own Node Lightning or Bitcoin Core
 
 # Product
