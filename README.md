@@ -18,11 +18,11 @@ Wallet support for RGB assets, BitDEX and Lightning Network
 
 # Roadmap 
 
--[x] Lightning Network and RGB
+-[X] Lightning Network and RGB
 
 -[] RGB proxy
 
--[x] Testnet
+-[X] Testnet
 
 -[ ] BitDEX
 
