@@ -6,6 +6,7 @@ Wallet support for RGB assets, BitDEX and Lightning Network
 # Features
 
 -BitDEX;
+
 -Lightning Network;
 
 -RGB wallet;
