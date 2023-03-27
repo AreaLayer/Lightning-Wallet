@@ -15,6 +15,17 @@ Wallet support for RGB assets, BitDEX and Lightning Network
 
 -Add own Node Lightning or Bitcoin Core
 
+
+# Roadmap 
+
+-[x] Lightning Network and RGB
+
+-[] RGB proxy
+
+-[x] Testnet
+
+-[ ] BitDEX
+
 # Product
 
 Built on RGB, LDK and BDK
