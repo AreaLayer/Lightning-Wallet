@@ -11,6 +11,7 @@ use rgb_wallet::{
     manager::{Manager, WalletEntry},
     storage::{FileStorage, Storage},
     wallet::{AddressPointer, Wallet},
+    invoice::{AttachId, ContractId, SecretSeal},
 };
 use secp256k1::Secp256k1;
 use std::collections::HashMap;
@@ -54,6 +55,7 @@ let issue_txid = wallet
     .unwrap();
 
 // Wait for the transaction to confirm
+let transaction_confirm::Amount
 // Note: This is not strictly necessary if you only want to receive tokens and NFTs and not spend them immediately
 
 // Check the wallet's balance and transactions
